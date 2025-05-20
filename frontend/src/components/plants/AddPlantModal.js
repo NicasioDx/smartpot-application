@@ -15,6 +15,7 @@ const AddPlantModal = ({ isOpen, onClose, onAddPlant }) => {
   const [species, setSpecies] = useState([])
   const [selectedSpecies, setSelectedSpecies] = useState("")
   const [customSpecies, setCustomSpecies] = useState("")
+  const [imageFile, setImageFile] = useState(null) // [เพิ่ม] เก็บไฟล์ภาพ
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isSpeciesLoading, setIsSpeciesLoading] = useState(false)
@@ -47,6 +48,13 @@ const AddPlantModal = ({ isOpen, onClose, onAddPlant }) => {
     setSelectedSpecies("")
   }
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setImageFile(file) // [เพิ่ม] เก็บไฟล์ที่เลือก
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError("")
@@ -55,16 +63,27 @@ const AddPlantModal = ({ isOpen, onClose, onAddPlant }) => {
     const finalSpecies = selectedSpecies || customSpecies || null
 
     try {
-      const response = await api.post("/api/plants", {
-        name,
-        species: finalSpecies,
-        imageUrl: "/placeholder.svg?height=300&width=300", // In a real app, you'd upload the image
+      // [แก้ไข] ส่งข้อมูลแบบ FormData เพื่อรองรับไฟล์
+      const formData = new FormData()
+      formData.append("name", name)
+      formData.append("species", finalSpecies)
+      if (imageFile) {
+        formData.append("image", imageFile)
+      }
+
+      const response = await api.post("/api/plants", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       })
 
       onAddPlant(response.data)
+
+      // reset form
       setName("")
       setSelectedSpecies("")
       setCustomSpecies("")
+      setImageFile(null) // [เพิ่ม] รีเซ็ตไฟล์ภาพหลังเพิ่มเสร็จ
     } catch (err) {
       setError(err.response?.data?.error || "เกิดข้อผิดพลาดในการเพิ่มต้นไม้")
     } finally {
@@ -87,7 +106,7 @@ const AddPlantModal = ({ isOpen, onClose, onAddPlant }) => {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-4 space-y-4">
+          <form onSubmit={handleSubmit} className="p-4 space-y-4" encType="multipart/form-data">
             {error && <Alert type="error" message={error} />}
 
             <div className="space-y-2">
@@ -120,13 +139,14 @@ const AddPlantModal = ({ isOpen, onClose, onAddPlant }) => {
               <label htmlFor="image" className="block text-sm font-medium text-gray-700">
                 รูปภาพ
               </label>
+              {/* [แก้ไข] เอา disabled ออก และเพิ่ม onChange */}
               <Input
                 id="image"
                 type="file"
                 accept="image/*"
-                disabled={true} // Disabled for this example
+                onChange={handleImageChange}
               />
-              <p className="text-xs text-gray-500">* ในตัวอย่างนี้ไม่รองรับการอัปโหลดรูปภาพ</p>
+              <p className="text-xs text-gray-500">* สามารถเลือกไฟล์รูปภาพได้</p>
             </div>
 
             <div className="flex justify-end space-x-3 pt-4">
