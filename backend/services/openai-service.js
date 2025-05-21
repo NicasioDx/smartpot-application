@@ -1,9 +1,13 @@
+//backend\services\openai-service.js
+
+require("dotenv").config()
+
 const OpenAI = require("openai")
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
-
+console.log("✅ Loaded OpenAI API Key:", process.env.OPENAI_API_KEY?.slice(0, 10) + '...')
 /**
  * ขอคำแนะนำในการดูแลพืชจาก OpenAI
  * @param {string} plantSpecies - ชื่อสายพันธุ์พืช
@@ -12,7 +16,7 @@ const openai = new OpenAI({
 async function getPlantCareRecommendations(plantSpecies) {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [
         {
           role: "system",
@@ -21,12 +25,11 @@ async function getPlantCareRecommendations(plantSpecies) {
         {
           role: "user",
           content: `ฉันกำลังปลูก ${plantSpecies} ช่วยแนะนำวิธีการดูแลที่เหมาะสมเกี่ยวกับ:
-          1. ความต้องการน้ำ (ความถี่ในการรดน้ำ)
-          2. ความต้องการแสง
-          3. อุณหภูมิที่เหมาะสม
-          4. ความต้องการปุ๋ย
-          5. ปัญหาทั่วไปที่อาจพบและวิธีแก้ไข
-          6. เคล็ดลับพิเศษในการดูแล
+          1. ความต้องการน้ำ (ความถี่ในการรดน้ำ) เป็นเปอร์เซ็นต์
+          2. ความต้องการแสง เป็นเปอร์เซ็นต์
+          3. ความต้องการปุ๋ย เป็นเปอร์เซ็นต์
+          4. ปัญหาทั่วไปที่อาจพบและวิธีแก้ไข
+          5. เคล็ดลับพิเศษในการดูแล
           
           กรุณาตอบเป็นภาษาไทย และแบ่งหัวข้อให้ชัดเจน`,
         },

@@ -52,17 +52,9 @@ export const AuthProvider = ({ children }) => {
   }
 
   const register = async (userData) => {
-    const response = await api.post("/api/auth/register", userData)
-    const { token, user } = response.data
-
-    localStorage.setItem("token", token)
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`
-
-    setCurrentUser(user)
-    setIsAuthenticated(true)
-
-    return user
-  }
+  const response = await api.post("/api/auth/register", userData)
+  return response.data // 👈 แค่ส่งข้อมูลกลับ ไม่ set token, ไม่ set auth
+}
 
   const logout = () => {
     localStorage.removeItem("token")

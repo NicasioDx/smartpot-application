@@ -1,14 +1,15 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 import { useToast } from "../contexts/ToastContext"
 
 const RegisterPage = () => {
   const navigate = useNavigate()
-  const { register, isAuthenticated } = useAuth()
+  const { register } = useAuth()
   const { addToast } = useToast()
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -16,14 +17,9 @@ const RegisterPage = () => {
     nickname: "",
     birthDate: "",
   })
+
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/dashboard")
-    }
-  }, [isAuthenticated, navigate])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -49,7 +45,11 @@ const RegisterPage = () => {
         birthDate: formData.birthDate || null,
       })
 
-      navigate("/dashboard")
+      // ✅ แสดงข้อความแจ้งเตือน
+      addToast("สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ", "success")
+
+      // ✅ กลับไปหน้า login
+      navigate("/")
     } catch (err) {
       setError(err.response?.data?.error || "เกิดข้อผิดพลาดในการลงทะเบียน")
     } finally {

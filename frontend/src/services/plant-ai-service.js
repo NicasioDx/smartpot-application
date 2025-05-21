@@ -1,4 +1,8 @@
+//frontend\src\services\plant-ai-service.js
+
 import api from "./api"
+console.log("OpenAI API Key:", process.env.OPENAI_API_KEY)
+
 
 /**
  * ดึงรายชื่อสายพันธุ์พืชที่นิยมปลูก

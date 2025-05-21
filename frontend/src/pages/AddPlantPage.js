@@ -11,6 +11,7 @@ const AddPlantPage = () => {
   const { addToast } = useToast()
   const [name, setName] = useState("")
   const [species, setSpecies] = useState("")
+  const [imageFile, setImageFile] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
@@ -20,10 +21,17 @@ const AddPlantPage = () => {
     setLoading(true)
 
     try {
-      const response = await api.post("/api/plants", {
-        name,
-        species: species || null,
-        imageUrl: "/placeholder.svg?height=300&width=300", // In a real app, you'd upload the image
+      const formData = new FormData()
+      formData.append("name", name)
+      formData.append("species", species || "")
+      if (imageFile) {
+        formData.append("image", imageFile)
+      }
+
+      const response = await api.post("/api/plants", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       })
 
       addToast({
@@ -46,7 +54,7 @@ const AddPlantPage = () => {
 
       <main className="container mx-auto px-4 py-6">
         <div className="bg-white rounded-lg shadow p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6" encType="multipart/form-data">
             {error && (
               <div className="bg-red-50 border-l-4 border-red-400 p-4">
                 <div className="text-sm text-red-700">{error}</div>
@@ -88,10 +96,12 @@ const AddPlantPage = () => {
                 id="image"
                 type="file"
                 accept="image/*"
-                disabled={true} // Disabled for this example
+                onChange={(e) => setImageFile(e.target.files[0])}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
               />
-              <p className="mt-1 text-sm text-gray-500">* ในตัวอย่างนี้ไม่รองรับการอัปโหลดรูปภาพ</p>
+              {imageFile && (
+                <p className="mt-1 text-sm text-gray-500">ไฟล์ที่เลือก: {imageFile.name}</p>
+              )}
             </div>
 
             <div>
