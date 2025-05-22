@@ -5,7 +5,7 @@ const router = express.Router()
 const { pool } = require("../db")
 const { authenticateToken } = require("../middlewares/authMiddleware")
 
-router.get("/api/plants/:id/activities", authenticateToken, async (req, res) => {
+router.get("/plants/:id/activities", authenticateToken, async (req, res) => {
   try {
     const plantId = req.params.id
 
@@ -36,7 +36,7 @@ router.get("/api/plants/:id/activities", authenticateToken, async (req, res) => 
   }
 })
 
-router.post("/api/plants/:id/activities", authenticateToken, async (req, res) => {
+router.post("/plants/:id/activities", authenticateToken, async (req, res) => {
   try {
     const plantId = req.params.id
     const { activityType, notes } = req.body

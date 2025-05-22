@@ -28,7 +28,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 app.use("/api/profile", profileRoutes)
 app.use("/api/plants", plantRoutes)
-app.use("/api/activities", activityRoutes)
+app.use("/api/", activityRoutes)
 app.use("/api/iot", iotRoutes)
 app.use("/api/auth", authRoutes)
 
