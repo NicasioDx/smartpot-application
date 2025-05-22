@@ -1,3 +1,4 @@
+//frontend/src/components/plants/PlantCard.js
 import { Link } from "react-router-dom"
 
 const PlantCard = ({ plant }) => {
@@ -6,10 +7,10 @@ const PlantCard = ({ plant }) => {
       <div className="bg-white rounded-lg shadow overflow-hidden transition-transform hover:scale-105">
         <div className="aspect-square relative">
           <img
-            src={plant.imageUrl || "/placeholder.svg?height=300&width=300"}
-            alt={plant.name}
-            className="w-full h-full object-cover"
-          />
+  src={`http://localhost:5000${plant.imageUrl}`}
+  alt={plant.name}
+  className="w-full h-full object-cover"
+/>
         </div>
         <div className="p-4">
           <h3 className="font-medium text-lg truncate">{plant.name}</h3>

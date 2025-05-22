@@ -3,11 +3,8 @@ const express = require("express");
 const router = express.Router();
 const { pool } = require("../db");
 const { authenticateToken } = require("../middlewares/authMiddleware");
-const multer = require("multer");
-const upload = multer({ dest: "uploads/" }); // หรือ config ตามที่ต้องการ
+const upload = require("../middlewares/uploadMiddleware"); // ใช้ middleware ที่คุณเตรียมไว้
 
-// นำเข้าฟังก์ชันจาก Gemini service
-// คุณอาจต้องการเปลี่ยนชื่อถ้ามีการชนกับบริการอื่น เช่น getOpenAICareRecommendations
 const {
   getPlantCareRecommendations: getGeminiCareRecommendations,
   getPopularPlantSpecies: getGeminiPopularPlantSpecies,
@@ -18,7 +15,7 @@ router.get("/", authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT id, user_id, name, species, image_url, care_recommendations, created_at, updated_at FROM plants WHERE user_id = $1 ORDER BY created_at DESC",
-      [req.user.id],
+      [req.user.id]
     );
 
     res.json(
@@ -31,7 +28,7 @@ router.get("/", authenticateToken, async (req, res) => {
         careRecommendations: plant.care_recommendations,
         createdAt: plant.created_at,
         updatedAt: plant.updated_at,
-      })),
+      }))
     );
   } catch (error) {
     console.error("Get plants error:", error);
@@ -39,7 +36,7 @@ router.get("/", authenticateToken, async (req, res) => {
   }
 });
 
-// GET /api/plants/care-recommendations (ยังคงใช้เหมือนเดิม)
+// GET /api/plants/care-recommendations
 router.get("/care-recommendations", async (req, res) => {
   try {
     const species = req.query.species;
@@ -47,7 +44,6 @@ router.get("/care-recommendations", async (req, res) => {
       return res.status(400).json({ message: "Missing species" });
     }
 
-    // สร้าง messages array ในรูปแบบที่ Gemini Service คาดหวัง
     const messages = [
       {
         role: "system",
@@ -67,7 +63,6 @@ router.get("/care-recommendations", async (req, res) => {
       },
     ];
 
-    // เรียกใช้ฟังก์ชันจาก Gemini service ที่รับ messages array
     const recommendation = await getGeminiCareRecommendations(messages);
     res.json({ recommendations: recommendation });
   } catch (err) {
@@ -76,11 +71,10 @@ router.get("/care-recommendations", async (req, res) => {
   }
 });
 
-// เพิ่ม API Endpoint ใหม่สำหรับดึงรายชื่อพืชยอดนิยมจาก Gemini
 // GET /api/plants/popular-species
 router.get("/popular-species", async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 20; // รับ limit จาก query parameter, default เป็น 20
+    const limit = parseInt(req.query.limit) || 20;
     const popularPlants = await getGeminiPopularPlantSpecies(limit);
     res.json({ plants: popularPlants });
   } catch (err) {
@@ -96,7 +90,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
 
     const plantResult = await pool.query(
       "SELECT id, user_id, name, species, image_url, care_recommendations, created_at, updated_at FROM plants WHERE id = $1 AND user_id = $2",
-      [plantId, req.user.id],
+      [plantId, req.user.id]
     );
 
     if (plantResult.rows.length === 0) {
@@ -105,10 +99,9 @@ router.get("/:id", authenticateToken, async (req, res) => {
 
     const plant = plantResult.rows[0];
 
-    // Get latest sensor data
     const sensorResult = await pool.query(
       "SELECT id, plant_id, moisture_level, npk_nitrogen, npk_phosphorus, npk_potassium, light_level, temperature, recorded_at FROM sensor_data WHERE plant_id = $1 ORDER BY recorded_at DESC LIMIT 1",
-      [plantId],
+      [plantId]
     );
 
     const sensorData = sensorResult.rows.length > 0 ? sensorResult.rows[0] : null;
@@ -147,23 +140,21 @@ router.get("/:id/sensor-data", authenticateToken, async (req, res) => {
   try {
     const plantId = req.params.id;
 
-    // ตรวจสอบว่าต้นไม้เป็นของ user นี้จริงหรือไม่
     const plantCheck = await pool.query(
       "SELECT id FROM plants WHERE id = $1 AND user_id = $2",
-      [plantId, req.user.id],
+      [plantId, req.user.id]
     );
     if (plantCheck.rows.length === 0) {
       return res.status(404).json({ error: "ไม่พบต้นไม้" });
     }
 
-    // ดึงข้อมูล sensor data ล่าสุดของต้นไม้
     const sensorResult = await pool.query(
       `SELECT id, plant_id, moisture_level, npk_nitrogen, npk_phosphorus, npk_potassium, light_level, temperature, recorded_at
          FROM sensor_data
          WHERE plant_id = $1
          ORDER BY recorded_at DESC
          LIMIT 1`,
-      [plantId],
+      [plantId]
     );
 
     if (sensorResult.rows.length === 0) {
@@ -187,17 +178,13 @@ router.post("/", authenticateToken, upload.single("image"), async (req, res) => 
       return res.status(400).json({ error: "ชื่อของต้นไม้ (name) ต้องไม่เป็นค่าว่าง" });
     }
 
-    // ถ้ามีไฟล์ image อัปโหลดมา
     if (req.file) {
-      // TODO: คุณอาจจะต้องอัปโหลดไฟล์นี้ไปยัง storage ที่เหมาะสม
-      // เช่น AWS S3 หรือเซิร์ฟเวอร์ของคุณเอง
-      // ตอนนี้สมมติใช้ path แบบ local
       imageUrl = `/uploads/${req.file.filename}`;
     }
 
     const result = await pool.query(
       "INSERT INTO plants (user_id, name, species, image_url) VALUES ($1, $2, $3, $4) RETURNING id, user_id, name, species, image_url, created_at, updated_at",
-      [req.user.id, name, species || null, imageUrl],
+      [req.user.id, name, species || null, imageUrl]
     );
 
     const plant = result.rows[0];
@@ -223,7 +210,6 @@ router.put("/:id", authenticateToken, async (req, res) => {
     const plantId = req.params.id;
     const { name, species, imageUrl, careRecommendations } = req.body;
 
-    // Check if plant exists and belongs to user
     const plantCheck = await pool.query("SELECT id FROM plants WHERE id = $1 AND user_id = $2", [
       plantId,
       req.user.id,
@@ -235,7 +221,7 @@ router.put("/:id", authenticateToken, async (req, res) => {
 
     const result = await pool.query(
       "UPDATE plants SET name = $1, species = $2, image_url = $3, care_recommendations = $4 WHERE id = $5 RETURNING id, user_id, name, species, image_url, care_recommendations, created_at, updated_at",
-      [name, species || null, imageUrl || null, careRecommendations || null, plantId],
+      [name, species || null, imageUrl || null, careRecommendations || null, plantId]
     );
 
     const plant = result.rows[0];
@@ -261,7 +247,6 @@ router.delete("/:id", authenticateToken, async (req, res) => {
   try {
     const plantId = req.params.id;
 
-    // Check if plant exists and belongs to user
     const plantCheck = await pool.query("SELECT id FROM plants WHERE id = $1 AND user_id = $2", [
       plantId,
       req.user.id,

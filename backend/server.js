@@ -31,7 +31,11 @@ app.use("/api/plants", plantRoutes)
 app.use("/api/activities", activityRoutes)
 app.use("/api/iot", iotRoutes)
 app.use("/api/auth", authRoutes)
-app.use("/uploads", express.static(path.join(__dirname, "uploads")))
+
+const uploadsPath = path.join(__dirname, 'uploads');
+console.log("Uploads folder path:", uploadsPath);
+app.use('/uploads', express.static(uploadsPath));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.listen(PORT,'0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`)

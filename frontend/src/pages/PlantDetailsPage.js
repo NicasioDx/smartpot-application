@@ -165,7 +165,7 @@
 
 
 
-
+//frontend\src\pages\PlantDetailsPage.js
 
 "use client"
 
@@ -292,6 +292,7 @@ const PlantDetailsPage = () => {
       </div>
     );
   }
+  console.log("Image URL:", plant.imageUrl);
 
   return (
     <div className="min-h-screen bg-gray-50">

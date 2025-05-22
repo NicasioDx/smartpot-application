@@ -14,10 +14,10 @@ const PlantInfo = ({ plant }) => {
         <div className="md:w-1/3">
           <div className="aspect-square rounded-lg overflow-hidden">
             <img
-              src={plant.imageUrl || "/placeholder.svg?height=400&width=400"}
-              alt={plant.name}
-              className="w-full h-full object-cover"
-            />
+            src={`http://localhost:5000${plant.imageUrl}`}
+            alt={plant.name}
+            className="w-full h-full object-cover"
+          />
           </div>
         </div>
 
