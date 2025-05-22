@@ -23,7 +23,7 @@ const ProfilePage = () => {
           <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
             <h3 className="text-lg leading-6 font-medium text-gray-900">ข้อมูลส่วนตัว</h3>
             <Link
-              to="/profile/edit"
+              to="/edit-profile"
               className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
             >
               แก้ไข

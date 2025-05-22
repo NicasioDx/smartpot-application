@@ -50,12 +50,12 @@ void loop() {
   float lightLevel = readLightSensor();
   
   // Read NPK values (these would be implemented based on your specific NPK sensor)
-  float nitrogen = 40.5;    // Example value
-  float phosphorus = 30.2;  // Example value
-  float potassium = 20.8;   // Example value
+  float nitrogen = 50;    // Example value
+  float phosphorus = 50;  // Example value
+  float potassium = 50;   // Example value
   
   // Read temperature (if you have a temperature sensor)
-  float temperature = 25.5; // Example value
+  float temperature = 50; // Example value
   
   // Send data to server
   sendSensorData(moistureLevel, nitrogen, phosphorus, potassium, lightLevel, temperature);

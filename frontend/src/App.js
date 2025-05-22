@@ -11,6 +11,7 @@ import PlantDetailsPage from "./pages/PlantDetailsPage"
 import PlantHistoryPage from "./pages/PlantHistoryPage"
 import ProfilePage from "./pages/ProfilePage"
 import AddPlantPage from "./pages/AddPlantPage"
+import EditProfilePage from "./pages/EditProfilePage"
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
@@ -72,6 +73,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AddPlantPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/edit-profile"
+              element={
+                <ProtectedRoute>
+                  <EditProfilePage />
                 </ProtectedRoute>
               }
             />

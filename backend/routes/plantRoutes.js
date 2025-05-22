@@ -5,11 +5,6 @@ const { pool } = require("../db");
 const { authenticateToken } = require("../middlewares/authMiddleware");
 const upload = require("../middlewares/uploadMiddleware"); // ใช้ middleware ที่คุณเตรียมไว้
 
-const {
-  getPlantCareRecommendations: getGeminiCareRecommendations,
-  getPopularPlantSpecies: getGeminiPopularPlantSpecies,
-} = require("../services/gemini-service");
-
 // GET /api/plants
 router.get("/", authenticateToken, async (req, res) => {
   try {
